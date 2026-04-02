@@ -12,47 +12,24 @@ end)
 -- تحميل UI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- 🔐 Key System
-WindUI.Services.ahmedkey = {
-    Name = "Ahmed Key",
-    Icon = "key",
-    Args = {},
-
-    New = function()
-        local correctKey = "5566"
-
-        return {
-            Verify = function(key)
-                if key == correctKey then
-                    return true, "صح ✅"
-                else
-                    return false, "كود غلط ❌"
-                end
-            end,
-
-            Copy = function()
-                setclipboard("https://rekonise.com/key-cltk6")
-            end
-        }
-    end
-}
-
--- نافذة
+-- نافذة (القائمة الجديدة)
 local Window = WindUI:CreateWindow({
-    Title = "🔥 احمد بطل",
-    Icon = "target",
-    Author = "Ahmed",
+    Title = "🔥 Ahmed Hub",
+    Icon = "door-open",
+    Author = "by Ahmed",
+
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+    HideSearchBar = true,
 
     KeySystem = {
-        Note = "خذ الكود من الرابط 🔑",
-        API = {
-            {
-                Title = "Get Key",
-                Desc = "اضغط لنسخ الرابط",
-                Icon = "key",
-                Type = "ahmedkey"
-            }
-        }
+        Key = {"5566"},
+        Note = "اكتب الكود 5566 🔑",
+        URL = "https://rekonise.com/key-cltk6",
+        SaveKey = true
     }
 })
 
@@ -70,34 +47,11 @@ local LocalPlayer = Players.LocalPlayer
 local Aimbot = false
 local ESP = false
 
--- 🔘 أزرار (تفعيل وليس ضغط)
-Tab:Button({
-    Title = "تشغيل Aimbot 🎯",
-    Callback = function()
-        Aimbot = true
-    end
-})
-
-Tab:Button({
-    Title = "ايقاف Aimbot ❌",
-    Callback = function()
-        Aimbot = false
-    end
-})
-
-Tab:Button({
-    Title = "تشغيل ESP 👁️",
-    Callback = function()
-        ESP = true
-    end
-})
-
-Tab:Button({
-    Title = "ايقاف ESP ❌",
-    Callback = function()
-        ESP = false
-    end
-})
+-- أزرار
+Tab:Button({Title="تشغيل Aimbot 🎯",Callback=function() Aimbot=true end})
+Tab:Button({Title="ايقاف Aimbot ❌",Callback=function() Aimbot=false end})
+Tab:Button({Title="تشغيل ESP 👁️",Callback=function() ESP=true end})
+Tab:Button({Title="ايقاف ESP ❌",Callback=function() ESP=false end})
 
 -- Team Check
 local function IsEnemy(player)
@@ -146,7 +100,7 @@ local function GetClosest()
     return closest
 end
 
--- ESP متطور (كبير وواضح)
+-- ESP
 local ESPTable = {}
 
 local function AddESP(player)
@@ -168,17 +122,12 @@ local function AddESP(player)
     text.Font = Enum.Font.GothamBold
     text.TextColor3 = Color3.new(1,1,1)
 
-    ESPTable[player] = {
-        highlight = highlight,
-        bill = bill,
-        text = text
-    }
+    ESPTable[player] = {highlight=highlight, bill=bill, text=text}
 end
 
 for _,v in pairs(Players:GetPlayers()) do
     AddESP(v)
 end
-
 Players.PlayerAdded:Connect(AddESP)
 
 -- تشغيل
@@ -212,7 +161,7 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 🎯 Aimbot (تفعيلة ON)
+    -- 🎯 Aimbot (تفعيلة)
     if Aimbot then
         local t = GetClosest()
         if t and t.Character and t.Character:FindFirstChild("Head") then
