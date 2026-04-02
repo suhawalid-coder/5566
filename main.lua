@@ -9,7 +9,7 @@ pcall(function()
     })
 end)
 
--- تحميل UI
+-- تحميل WindUI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 -- 🔐 Key
@@ -29,8 +29,9 @@ WindUI.Services.mykeysystem = {
                     return false, "خطأ ❌"
                 end
             end,
+
             Copy = function()
-                setclipboard("5566")
+                setclipboard("https://rekonise.com/key-cltk6") -- 🔗 رابطك
             end
         }
     end
@@ -43,7 +44,7 @@ local Window = WindUI:CreateWindow({
     Author = "Ahmed",
 
     KeySystem = {
-        Note = "اكتب الكود 🔑",
+        Note = "اضغط نسخ الرابط وخذ الكود 🔑",
         API = {
             { Type = "mykeysystem" }
         }
@@ -62,24 +63,38 @@ local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
 local Aimbot = false
-local ESP = true
+local ESP = false
 
--- أزرار
-Tab:Toggle({
-    Title = "Aimbot",
-    Callback = function(v)
-        Aimbot = v
+-- 🔘 أزرار
+Tab:Button({
+    Title = "تشغيل Aimbot 🎯",
+    Callback = function()
+        Aimbot = true
     end
 })
 
-Tab:Toggle({
-    Title = "ESP",
-    Callback = function(v)
-        ESP = v
+Tab:Button({
+    Title = "ايقاف Aimbot ❌",
+    Callback = function()
+        Aimbot = false
     end
 })
 
--- أقرب لاعب
+Tab:Button({
+    Title = "تشغيل ESP 👁️",
+    Callback = function()
+        ESP = true
+    end
+})
+
+Tab:Button({
+    Title = "ايقاف ESP ❌",
+    Callback = function()
+        ESP = false
+    end
+})
+
+-- 🎯 أقرب لاعب
 local function GetClosest()
     local closest, dist = nil, math.huge
 
@@ -99,13 +114,14 @@ local function GetClosest()
     return closest
 end
 
--- ESP
+-- 👁️ ESP
 local ESPTable = {}
 
 local function AddESP(player)
     if player == LocalPlayer then return end
 
     local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.3
     highlight.Parent = game.CoreGui
 
     ESPTable[player] = highlight
@@ -116,25 +132,29 @@ for _,v in pairs(Players:GetPlayers()) do
 end
 Players.PlayerAdded:Connect(AddESP)
 
--- تشغيل
+-- 🔄 تشغيل
 RunService.RenderStepped:Connect(function()
 
     -- ESP
     for player,highlight in pairs(ESPTable) do
-        if ESP and player.Character then
-            if (not player.Team) or (not LocalPlayer.Team) or player.Team ~= LocalPlayer.Team then
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            
+            if ESP and ((not player.Team) or (not LocalPlayer.Team) or player.Team ~= LocalPlayer.Team) then
+                
                 highlight.Adornee = player.Character
                 highlight.FillColor = Color3.fromRGB(255,0,0)
                 highlight.Enabled = true
+
             else
                 highlight.Enabled = false
             end
+
         else
             highlight.Enabled = false
         end
     end
 
-    -- 🎯 Aimbot سريع
+    -- 🎯 Aimbot
     if Aimbot then
         local t = GetClosest()
         if t and t.Character and t.Character:FindFirstChild("Head") then
