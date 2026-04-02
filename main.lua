@@ -1,189 +1,266 @@
--- إشعار
-print("🔥 Ahmed Hub Loaded")
-
-pcall(function()
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "احمد بطل",
-        Text = "اشتغل السكربت ✅",
-        Duration = 5
-    })
-end)
-
--- تحميل UI
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+-- تحميل WindUI
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/footagesus/WindUI/main/dist/library.lua"))()
 
 -- نافذة
 local Window = WindUI:CreateWindow({
-    Title = "My Super Hub",
+    Title = "🔥 ماب حياة السجن",
     Icon = "door-open",
     Author = "Ahmed",
-    Size = UDim2.fromOffset(580,460),
-
-    KeySystem = {
-        Key = {"5566"},
-        Note = "اكتب الكود  🔑",
-        URL = "https://rekonise.com/key-cltk6",
-        SaveKey = false
-    }
+    Folder = "AhmedHub",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
 })
 
-local Tab = Window:Tab({Title="Main",Icon="zap"})
+local Tab = Window:Tab({ Title = "التحكم", Icon = "settings" })
 
--- خدمات
+-- =========================
+-- الإعدادات
+-- =========================
+local Settings = {
+    تتبع = false,
+    اظهار = false,
+    طيران = false,
+    FOV = false,
+    فرق = true, -- 🔥 نظام الفرق
+
+    قوة_القفز = 100,
+    سرعة_الطيران = 60,
+    سرعة_التتبع = 0.2,
+    حجم_FOV = 150
+}
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
-local Aimbot = false
-local ESP = false
-local JumpPower = 120
+-- =========================
+-- التحقق من العدو
+-- =========================
+local function عدو(p)
+    if not Settings.فرق then return true end
+    if not p.Team or not LocalPlayer.Team then return true end
+    return p.Team ~= LocalPlayer.Team
+end
 
--- أزرار
-Tab:Button({Title="تشغيل Aimbot 🎯",Callback=function()Aimbot=true end})
-Tab:Button({Title="ايقاف Aimbot ❌",Callback=function()Aimbot=false end})
-Tab:Button({Title="تشغيل ESP 👁️",Callback=function()ESP=true end})
-Tab:Button({Title="ايقاف ESP ❌",Callback=function()ESP=false end})
+-- =========================
+-- Toggles
+-- =========================
+Tab:Toggle({
+    Title = "🎯 تتبع",
+    Callback = function(v) Settings.تتبع = v end
+})
 
-Tab:Button({
-    Title="زيادة القفز 🦘",
-    Callback=function()
-        JumpPower = JumpPower + 50
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.JumpPower = JumpPower
+Tab:Toggle({
+    Title = "👁️ ESP",
+    Callback = function(v) Settings.اظهار = v end
+})
+
+Tab:Toggle({
+    Title = "🕊️ Fly",
+    Callback = function(v) Settings.طيران = v end
+})
+
+Tab:Toggle({
+    Title = "🎯 FOV",
+    Callback = function(v) Settings.FOV = v end
+})
+
+Tab:Toggle({
+    Title = "👥 نظام الفرق",
+    Default = true,
+    Callback = function(v) Settings.فرق = v end
+})
+
+-- =========================
+-- Sliders
+-- =========================
+Tab:Slider({
+    Title = "🦘 قوة القفز",
+    Min = 50,
+    Max = 300,
+    Value = 100,
+    Callback = function(v)
+        Settings.قوة_القفز = v
+        if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = v
         end
     end
 })
 
+Tab:Slider({
+    Title = "🕊️ سرعة الطيران",
+    Min = 20,
+    Max = 200,
+    Value = 60,
+    Callback = function(v)
+        Settings.سرعة_الطيران = v
+    end
+})
+
+Tab:Slider({
+    Title = "⚡ سرعة التتبع",
+    Min = 1,
+    Max = 10,
+    Value = 5,
+    Callback = function(v)
+        Settings.سرعة_التتبع = v / 10
+    end
+})
+
+Tab:Slider({
+    Title = "📏 حجم FOV",
+    Min = 50,
+    Max = 400,
+    Value = 150,
+    Callback = function(v)
+        Settings.حجم_FOV = v
+    end
+})
+
+-- =========================
+-- Buttons
+-- =========================
 Tab:Button({
-    Title="تقليل القفز ⬇️",
-    Callback=function()
-        JumpPower = math.max(50, JumpPower - 50)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.JumpPower = JumpPower
+    Title = "🛑 إيقاف كلشي",
+    Callback = function()
+        Settings.تتبع = false
+        Settings.اظهار = false
+        Settings.طيران = false
+        Settings.FOV = false
+    end
+})
+
+Tab:Button({
+    Title = "🚀 سرعة خارقة",
+    Callback = function()
+        Settings.سرعة_الطيران = 150
+        Settings.سرعة_التتبع = 0.5
+    end
+})
+
+Tab:Button({
+    Title = "🦘 قفز خارق",
+    Callback = function()
+        Settings.قوة_القفز = 250
+        if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 250
         end
     end
 })
 
--- حياة اللاعب
-local function IsAlive(player)
-    if not player.Character then return false end
-    local hum = player.Character:FindFirstChild("Humanoid")
-    return hum and hum.Health > 0
-end
+-- =========================
+-- FOV
+-- =========================
+local circle = Drawing.new("Circle")
+circle.Thickness = 2
+circle.Filled = false
+circle.Color = Color3.fromRGB(255,0,0)
 
--- فريق
-local function IsEnemy(player)
-    if player == LocalPlayer then return false end
-    if LocalPlayer.Team and player.Team then
-        return player.Team ~= LocalPlayer.Team
-    end
-    return true
-end
-
--- جدار
-local function IsVisible(target)
-    local origin = Camera.CFrame.Position
-    local direction = (target.Position - origin)
-
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    params.FilterDescendantsInstances = {LocalPlayer.Character}
-
-    local result = workspace:Raycast(origin, direction, params)
-    if result then
-        return result.Instance:IsDescendantOf(target.Parent)
-    end
-    return true
-end
-
--- أقرب هدف
-local function GetClosest()
-    local closest, dist = nil, math.huge
-
-    for _,v in pairs(Players:GetPlayers()) do
-        if IsEnemy(v) and IsAlive(v) and v.Character and v.Character:FindFirstChild("Head") then
-            local head = v.Character.Head
-            local mag = (head.Position - Camera.CFrame.Position).Magnitude
-
-            if IsVisible(head) and mag < dist then
-                dist = mag
-                closest = v
-            end
-        end
-    end
-
-    return closest
-end
-
+-- =========================
 -- ESP
-local ESPTable = {}
+-- =========================
+local ESP = {}
 
-local function AddESP(player)
-    if player == LocalPlayer then return end
-
-    local highlight = Instance.new("Highlight")
-    highlight.FillTransparency = 0.3
-    highlight.Parent = game.CoreGui
+local function AddESP(p)
+    if p == LocalPlayer then return end
 
     local bill = Instance.new("BillboardGui")
-    bill.Size = UDim2.new(6,0,3,0)
+    bill.Size = UDim2.new(4,0,2,0)
     bill.AlwaysOnTop = true
 
-    local text = Instance.new("TextLabel", bill)
-    text.Size = UDim2.new(1,0,1,0)
-    text.BackgroundTransparency = 1
-    text.TextScaled = true
-    text.TextSize = 20
-    text.Font = Enum.Font.GothamBold
-    text.TextColor3 = Color3.new(1,1,1)
+    local txt = Instance.new("TextLabel", bill)
+    txt.Size = UDim2.new(1,0,1,0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = true
 
-    ESPTable[player] = {highlight=highlight, bill=bill, text=text}
+    ESP[p] = {bill, txt}
 end
 
-for _,v in pairs(Players:GetPlayers()) do
-    AddESP(v)
-end
+for _,v in pairs(Players:GetPlayers()) do AddESP(v) end
 Players.PlayerAdded:Connect(AddESP)
 
--- قفز
-LocalPlayer.CharacterAdded:Connect(function(char)
-    local hum = char:WaitForChild("Humanoid")
-    hum.JumpPower = JumpPower
-end)
+-- =========================
+-- Fly
+-- =========================
+local bv, bg
 
+-- =========================
 -- تشغيل
+-- =========================
 RunService.RenderStepped:Connect(function()
 
+    -- FOV
+    circle.Visible = Settings.FOV
+    circle.Radius = Settings.حجم_FOV
+    circle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+
     -- ESP
-    for player,data in pairs(ESPTable) do
-        if ESP and IsEnemy(player) and IsAlive(player) and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            local hum = player.Character:FindFirstChild("Humanoid")
+    for p,data in pairs(ESP) do
+        if Settings.اظهار and p.Character and عدو(p) then
+            local hum = p.Character:FindFirstChild("Humanoid")
 
-            if head and hum then
-                local dist = math.floor((head.Position - Camera.CFrame.Position).Magnitude)
+            data[1].Adornee = p.Character.Head
+            data[1].Parent = p.Character
 
-                data.highlight.Adornee = player.Character
-                data.highlight.FillColor = Color3.fromRGB(255,0,0)
-                data.highlight.Enabled = true
-
-                data.bill.Adornee = head
-                data.bill.Parent = player.Character
-                data.text.Text = player.Name.." | ❤️ "..math.floor(hum.Health).." | 📏 "..dist
-                data.bill.Enabled = true
+            if hum then
+                data[2].Text = p.Name.." ❤️"..math.floor(hum.Health)
             end
+
+            data[1].Enabled = true
         else
-            if data.highlight then data.highlight.Enabled=false end
-            if data.bill then data.bill.Enabled=false end
+            data[1].Enabled = false
         end
     end
 
-    -- Aimbot
-    if Aimbot then
-        local t = GetClosest()
-        if t and IsAlive(t) and t.Character and t.Character:FindFirstChild("Head") then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, t.Character.Head.Position)
+    -- تتبع
+    if Settings.تتبع then
+        local closest = nil
+        local dist = math.huge
+
+        for _,v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and عدو(v) then
+                local pos, vis = Camera:WorldToViewportPoint(v.Character.Head.Position)
+
+                if vis then
+                    local mag = (Vector2.new(pos.X,pos.Y) - Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)).Magnitude
+
+                    if mag < Settings.حجم_FOV and mag < dist then
+                        dist = mag
+                        closest = v
+                    end
+                end
+            end
+        end
+
+        if closest then
+            Camera.CFrame = Camera.CFrame:Lerp(
+                CFrame.new(Camera.CFrame.Position, closest.Character.Head.Position),
+                Settings.سرعة_التتبع
+            )
         end
     end
+
+    -- Fly
+    if Settings.طيران and LocalPlayer.Character then
+        local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            if not bv then
+                bv = Instance.new("BodyVelocity", hrp)
+                bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+
+                bg = Instance.new("BodyGyro", hrp)
+                bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
+            end
+
+            bv.Velocity = Camera.CFrame.LookVector * Settings.سرعة_الطيران
+            bg.CFrame = Camera.CFrame
+        end
+    else
+        if bv then bv:Destroy() bv=nil end
+        if bg then bg:Destroy() bg=nil end
+    end
+
 end)
