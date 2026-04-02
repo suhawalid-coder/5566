@@ -1,12 +1,14 @@
+-- إشعار البداية
 print("🔥 Ahmed Hub Loaded")
 
-game.StarterGui:SetCore("SendNotification", {
-    Title = "احمد بطل",
-    Text = "اشتغل السكربت ✅",
-    Duration = 5
-})
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "احمد بطل",
+        Text = "اشتغل السكربت ✅",
+        Duration = 5
+    })
+end)
 
--- هنا حط سكربتك الكامل (Aimbot + ESP + Key)
 -- تحميل WindUI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
@@ -36,7 +38,7 @@ WindUI.Services.mykeysystem = {
     end
 }
 
--- 🏷️ نافذة
+-- نافذة
 local Window = WindUI:CreateWindow({
     Title = "🔥 احمد بطل",
     Icon = "target",
