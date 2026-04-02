@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
         Key = {"5566"},
         Note = "اكتب الكود 5566 🔑",
         URL = "https://rekonise.com/key-cltk6",
-        SaveKey = true
+        SaveKey =false
     }
 })
 
