@@ -12,31 +12,22 @@ end)
 -- تحميل UI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- نافذة (القائمة الجديدة)
+-- نافذة
 local Window = WindUI:CreateWindow({
-    Title = "🔥 Ahmed Hub",
+    Title = "My Super Hub",
     Icon = "door-open",
-    Author = "by Ahmed",
-
-    Size = UDim2.fromOffset(580, 460),
-    Transparent = true,
-    Theme = "Dark",
-    Resizable = true,
-    SideBarWidth = 200,
-    HideSearchBar = true,
+    Author = "Ahmed",
+    Size = UDim2.fromOffset(580,460),
 
     KeySystem = {
         Key = {"5566"},
-        Note = "اكتب الكود 5566 🔑",
+        Note = "اكتب الكود  🔑",
         URL = "https://rekonise.com/key-cltk6",
-        SaveKey =false
+        SaveKey = false
     }
 })
 
-local Tab = Window:Tab({
-    Title = "Main",
-    Icon = "zap"
-})
+local Tab = Window:Tab({Title="Main",Icon="zap"})
 
 -- خدمات
 local Players = game:GetService("Players")
@@ -46,14 +37,42 @@ local LocalPlayer = Players.LocalPlayer
 
 local Aimbot = false
 local ESP = false
+local JumpPower = 120
 
 -- أزرار
-Tab:Button({Title="تشغيل Aimbot 🎯",Callback=function() Aimbot=true end})
-Tab:Button({Title="ايقاف Aimbot ❌",Callback=function() Aimbot=false end})
-Tab:Button({Title="تشغيل ESP 👁️",Callback=function() ESP=true end})
-Tab:Button({Title="ايقاف ESP ❌",Callback=function() ESP=false end})
+Tab:Button({Title="تشغيل Aimbot 🎯",Callback=function()Aimbot=true end})
+Tab:Button({Title="ايقاف Aimbot ❌",Callback=function()Aimbot=false end})
+Tab:Button({Title="تشغيل ESP 👁️",Callback=function()ESP=true end})
+Tab:Button({Title="ايقاف ESP ❌",Callback=function()ESP=false end})
 
--- Team Check
+Tab:Button({
+    Title="زيادة القفز 🦘",
+    Callback=function()
+        JumpPower = JumpPower + 50
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.JumpPower = JumpPower
+        end
+    end
+})
+
+Tab:Button({
+    Title="تقليل القفز ⬇️",
+    Callback=function()
+        JumpPower = math.max(50, JumpPower - 50)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.JumpPower = JumpPower
+        end
+    end
+})
+
+-- حياة اللاعب
+local function IsAlive(player)
+    if not player.Character then return false end
+    local hum = player.Character:FindFirstChild("Humanoid")
+    return hum and hum.Health > 0
+end
+
+-- فريق
 local function IsEnemy(player)
     if player == LocalPlayer then return false end
     if LocalPlayer.Team and player.Team then
@@ -62,7 +81,7 @@ local function IsEnemy(player)
     return true
 end
 
--- Wall Check
+-- جدار
 local function IsVisible(target)
     local origin = Camera.CFrame.Position
     local direction = (target.Position - origin)
@@ -72,21 +91,18 @@ local function IsVisible(target)
     params.FilterDescendantsInstances = {LocalPlayer.Character}
 
     local result = workspace:Raycast(origin, direction, params)
-
     if result then
         return result.Instance:IsDescendantOf(target.Parent)
     end
-
     return true
 end
 
--- أقرب لاعب (Head فقط)
+-- أقرب هدف
 local function GetClosest()
     local closest, dist = nil, math.huge
 
     for _,v in pairs(Players:GetPlayers()) do
-        if IsEnemy(v) and v.Character and v.Character:FindFirstChild("Head") then
-            
+        if IsEnemy(v) and IsAlive(v) and v.Character and v.Character:FindFirstChild("Head") then
             local head = v.Character.Head
             local mag = (head.Position - Camera.CFrame.Position).Magnitude
 
@@ -130,21 +146,24 @@ for _,v in pairs(Players:GetPlayers()) do
 end
 Players.PlayerAdded:Connect(AddESP)
 
+-- قفز
+LocalPlayer.CharacterAdded:Connect(function(char)
+    local hum = char:WaitForChild("Humanoid")
+    hum.JumpPower = JumpPower
+end)
+
 -- تشغيل
 RunService.RenderStepped:Connect(function()
 
     -- ESP
     for player,data in pairs(ESPTable) do
-        if player ~= LocalPlayer
-        and player.Character
-        and player.Character:FindFirstChild("Head")
-        and player.Character:FindFirstChild("Humanoid") then
+        if ESP and IsEnemy(player) and IsAlive(player) and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            local hum = player.Character:FindFirstChild("Humanoid")
 
-            local hum = player.Character.Humanoid
-            local head = player.Character.Head
-            local dist = math.floor((head.Position - Camera.CFrame.Position).Magnitude)
+            if head and hum then
+                local dist = math.floor((head.Position - Camera.CFrame.Position).Magnitude)
 
-            if ESP and IsEnemy(player) then
                 data.highlight.Adornee = player.Character
                 data.highlight.FillColor = Color3.fromRGB(255,0,0)
                 data.highlight.Enabled = true
@@ -152,19 +171,18 @@ RunService.RenderStepped:Connect(function()
                 data.bill.Adornee = head
                 data.bill.Parent = player.Character
                 data.text.Text = player.Name.." | ❤️ "..math.floor(hum.Health).." | 📏 "..dist
-
                 data.bill.Enabled = true
-            else
-                data.highlight.Enabled = false
-                data.bill.Enabled = false
             end
+        else
+            if data.highlight then data.highlight.Enabled=false end
+            if data.bill then data.bill.Enabled=false end
         end
     end
 
-    -- 🎯 Aimbot (تفعيلة)
+    -- Aimbot
     if Aimbot then
         local t = GetClosest()
-        if t and t.Character and t.Character:FindFirstChild("Head") then
+        if t and IsAlive(t) and t.Character and t.Character:FindFirstChild("Head") then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, t.Character.Head.Position)
         end
     end
