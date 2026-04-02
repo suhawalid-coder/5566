@@ -9,21 +9,21 @@ pcall(function()
     })
 end)
 
--- UI
+-- تحميل UI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- Key
-local KEY = "5566"
-
+-- 🔐 Key System (ثابت)
 WindUI.Services.mykeysystem = {
-    Name = "Key System",
+    Name = "Ahmed Key",
     Icon = "key",
     Args = {},
+
     New = function()
         return {
-            Verify = function(k)
-                return k == KEY, k == KEY and "صح ✅" or "خطأ ❌"
+            Verify = function(key)
+                return key == "5566", key == "5566" and "صح ✅" or "خطأ ❌"
             end,
+
             Copy = function()
                 setclipboard("https://rekonise.com/key-cltk6")
             end
@@ -36,15 +36,19 @@ local Window = WindUI:CreateWindow({
     Title = "🔥 احمد بطل",
     Icon = "target",
     Author = "Ahmed",
+
     KeySystem = {
-        Note = "انسخ الرابط وخذ الكود 🔑",
+        Note = "اكتب الكود 5566 🔑",
         API = {
             { Type = "mykeysystem" }
         }
     }
 })
 
-local Tab = Window:Tab({ Title = "Main", Icon = "zap" })
+local Tab = Window:Tab({
+    Title = "Main",
+    Icon = "zap"
+})
 
 -- خدمات
 local Players = game:GetService("Players")
@@ -54,29 +58,12 @@ local LocalPlayer = Players.LocalPlayer
 
 local Aimbot = false
 local ESP = false
-local Holding = false
 
 -- أزرار
 Tab:Button({Title="تشغيل Aimbot 🎯",Callback=function() Aimbot=true end})
 Tab:Button({Title="ايقاف Aimbot ❌",Callback=function() Aimbot=false end})
 Tab:Button({Title="تشغيل ESP 👁️",Callback=function() ESP=true end})
 Tab:Button({Title="ايقاف ESP ❌",Callback=function() ESP=false end})
-
--- 📱 زر Aim للموبايل
-local aimBtn = Instance.new("TextButton", game.CoreGui)
-aimBtn.Size = UDim2.new(0,80,0,80)
-aimBtn.Position = UDim2.new(1,-100,1,-120)
-aimBtn.Text = "AIM"
-aimBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-aimBtn.TextScaled = true
-
-aimBtn.MouseButton1Down:Connect(function()
-    Holding = true
-end)
-
-aimBtn.MouseButton1Up:Connect(function()
-    Holding = false
-end)
 
 -- Team Check
 local function IsEnemy(player)
@@ -97,9 +84,11 @@ local function IsVisible(target)
     params.FilterDescendantsInstances = {LocalPlayer.Character}
 
     local result = workspace:Raycast(origin, direction, params)
+
     if result then
         return result.Instance:IsDescendantOf(target.Parent)
     end
+
     return true
 end
 
@@ -123,7 +112,7 @@ local function GetClosest()
     return closest
 end
 
--- ESP متطور
+-- ESP متطور (كبير)
 local ESPTable = {}
 
 local function AddESP(player)
@@ -134,16 +123,22 @@ local function AddESP(player)
     highlight.Parent = game.CoreGui
 
     local bill = Instance.new("BillboardGui")
-    bill.Size = UDim2.new(4,0,2,0)
+    bill.Size = UDim2.new(6,0,3,0)
     bill.AlwaysOnTop = true
 
     local text = Instance.new("TextLabel", bill)
     text.Size = UDim2.new(1,0,1,0)
     text.BackgroundTransparency = 1
     text.TextScaled = true
+    text.TextSize = 20
+    text.Font = Enum.Font.GothamBold
     text.TextColor3 = Color3.new(1,1,1)
 
-    ESPTable[player] = {highlight=highlight, bill=bill, text=text}
+    ESPTable[player] = {
+        highlight = highlight,
+        bill = bill,
+        text = text
+    }
 end
 
 for _,v in pairs(Players:GetPlayers()) do
@@ -182,8 +177,8 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- 🎯 Aimbot (Head فقط + زر موبايل)
-    if Aimbot and Holding then
+    -- 🎯 Aimbot (مباشر بدون زر)
+    if Aimbot then
         local t = GetClosest()
         if t and t.Character and t.Character:FindFirstChild("Head") then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, t.Character.Head.Position)
